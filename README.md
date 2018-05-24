@@ -3,26 +3,35 @@
 Per instructions at https://wodby.com/stacks/drupal/docs/local/multiple-projects/
 
 ```
-[mark@centos7 Docker]$ git clone https://github.com/wodby/docker4drupal.git drupal
-[mark@centos7 Docker]$ cd drupal
+[mark@centos7 Docker]$ git clone https://github.com/wodby/docker4drupal.git SummittServices
+[mark@centos7 Docker]$ cd SummittServices
 ```
 
 *Decimal numbered steps below are modified from the aforementioned instructions.  Roman numeral steps were added as necessary.*
 
+#### I. Create a directory named `main` where common services like `portainer` and `mailhog` will exist.  Build a new `main/docker-compose.yml` file from `traefik.yml` and a new `main/.env` from the original `.env` file.
+
+```
+[mark@centos7 SummittServices]$ mkdir main
+[mark@centos7 SummittServices]$ cp -f traefik.yml main/docker-compose.yml
+[mark@centos7 SummittServices]$ cp .env main/
+```
+
 ##### 1. Create two dirs where you will host two projects. Let's name them ~~site1~~ d8 and ~~site2~~ d7
 
 ```
-[mark@centos7 drupal]$ mkdir d8
-[mark@centos7 drupal]$ mkdir d7
+[mark@centos7 SummittServices]$ mkdir d8
+[mark@centos7 SummittServices]$ mkdir d7
 ```
-##### 2. Copy `docker-compose.yml` file to both dirs (~~site1~~ d8 and ~~site2~~ d7)
-```
-[mark@centos7 drupal]$ cp docker-compose.yml d7/
-[mark@centos7 drupal]$ cp docker-compose.yml d8/
-```
-##### 3. ~~Download~~ A copy of traefik.yml file ~~(inside of docker4drupal.tar.gz archive) from the latest stable release to~~ already exists in the parent dir where ~~site1~~ d8 and ~~site2~~ d7 dirs are
 
-##### 4. Edit traefik.yml and change ~~project1-dir_default to site1_default and project2-dir_default to site2_default~~ ALL instances of 'project1' to 'd8' and 'project2' to 'd7'. Those are docker networks names that are created automatically from the dir name where docker-compose.yml is located
+##### 2. Copy `docker-compose.yml` and `docker-compose.override.yml` file to both dirs (~~site1~~ d8 and ~~site2~~ d7)
+```
+[mark@centos7 SummittServices]$ cp docker-compose*.yml d7/
+[mark@centos7 SummittServices]$ cp docker-compose*.yml d8/
+```
+##### 3. ~~Download~~ A copy of traefik.yml file ~~(inside of docker4drupal.tar.gz archive) from the latest stable release to~~ already exists in the `main` directory as `docker-compose.yml`.
+
+##### 4. Edit ~~`traefik.yml`~~ `main/docker-compose.yml` and remove `-dir` references while changing ~~project1-dir_default to site1_default and project2-dir_default to site2_default~~ ALL instances of 'project1' to 'd8' and 'project2' to 'd7'. `d7_default` and `d8_default` ~~Those~~ are docker network names that are created automatically from the directory name where individual `docker-compose.yml` files are located.
 
 ##### 5. Edit ~~site1~~d8's `docker-compose.yml` file. There are 3 main things that need to be done there:  
 
@@ -32,21 +41,49 @@ Per instructions at https://wodby.com/stacks/drupal/docs/local/multiple-projects
 
 ##### 6. Make similar 3 changes in ~~site2~~d7's `docker-compose.yml` file.
 
-#### VII. Copy `.env` from the main `drupal` directory to each of the `d8` and `d7` directories.  
+#### VII. Copy `.env` from the main `SummittServices` directory to each of the `d8` and `d7` directories.  
 
 #### VIII. In EACH copy of `.env` set appropriate `PROJECT_NAME` and `PROJECT_BASE_URL` variables, AND be sure to uncomment appropriate version tags depending on the project's target Drupal version.
 
-##### 7. Run `docker-compose up -d` in ~~site1~~ d8 and ~~site2~~ d7 dirs to spin up containers for both projects.
+##### 7. Run `docker-compose up -d` in `main`, ~~site1~~ `d8` and ~~site2~~ `d7` dirs to spin up containers for ~~both~~ all three projects.
 
-##### 8. Run stand-alone `traefik` using `docker-compose -f traefik.yml up -d` in the main directory to spin up Traefik reverse proxy.
+##### 8. Run stand-alone `traefik` using `docker-compose -f traefik.yml up -d` in the `SummittServices` directory to spin up Traefik reverse proxy.
 
-Note that I found it necessary to perform a `docker network prune` command in order to remove old Docker networks that had hold of necessary ports.
+Note that I found it necessary to perform a `docker network prune` command in order to remove old, unused Docker networks that had hold of necessary ports.
 
-##### 9. Visit ~~http://site1.docker.localhost~~ http://d8.docker.localhost and ~~http://site2.docker.localhost~~ http://d7.docker.localhost (as specifed in the two `.env` files) in your browser.
+##### 9. Visit ~~http://site1.docker.localhost~~ http://d8.docker.localhost and ~~http://site2.docker.localhost~~ http://d7.docker.localhost (as specifed in the two `.env` files) in your browser.  The first time you do so you should be prompted to setup the `default` site in each Drupal version.
 
-##### X. Unable to visit 'd8' or 'd7' sites, but http://traefik.docker.localhost:8080 responds as the *dashboard* and http://portainer.d8.docker.localhost responds showing ALL containers.
+#### X. Sites http://traefik.docker.localhost:8080 responds as the network *dashboard* and http://portainer.docker.localhost responds showing ALL containers.
 
-*Let's try moving the `portainer` service up into `traefik.yml` and removing it from the two `docker-compose.yml` files.*
+### Final Details
+
+`default` site names and credentials are:
+
+    Sites:  Drupal7, Drupal8
+    Database Names:  drupal
+    Database Usernames and Passwords:  drupal
+    Site Admin Users:  Admin
+    Site Admin Email: admin@summittservices.com
+    Site Admin Passwords: Drup@!7@dmin, Drup@!8@dmin
+
+The full startup sequence of commands is now...
+
+```
+[mark@centos7 SummittServices]$ source ../docker-destroy-all.sh
+[mark@centos7 SummittServices]$ docker network prune
+[mark@centos7 SummittServices]$ cd main
+[mark@centos7 main]$ docker-compose up -d
+[mark@centos7 SummittServices]$ cd ../d8
+[mark@centos7 d8]$ docker-compose up -d
+[mark@centos7 SummittServices]$ cd ../d7
+[mark@centos7 d8]$ docker-compose up -d
+[mark@centos7 d7]$ cd ..
+[mark@centos7 SummittServices]$ docker-compose -f traefik.yml up -d
+```
+
+Note: You can achieve ALL of the above semi-automatically using:  
+  `source ~/Projects/Docker/docker-restart-all.sh`
+
 
 # Docker-based Drupal stack
 
