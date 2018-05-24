@@ -84,6 +84,20 @@ The full startup sequence of commands is now...
 Note: You can achieve ALL of the above semi-automatically using:  
   `source ~/Projects/Docker/docker-restart-all.sh`
 
+# Default Sites Status
+
+At this point I have a working pair of D7 and D8 `default` sites named `Drupal7` and `Drupal8`, fronted by a `traefik` network proxy, a `portainer` management console, and an unconfirmed `mailhog` service.  All in Docker and based on Docker4Drupal.  There's currently no `https` or certs of any kind.  The Drupal sites have not been extended with any contributed or custom modules, and only the `default` databases and sites exist.
+
+The project has been pushed to https://github.com/SummittDweller/SummittServices/tree/default_sites_no_https for safe-keeping.  
+
+# Next Steps
+
+1. Add self-signed certs and *https*.
+2. Extend `default` sites with necessary contrib modules.
+3. Create a `wieting` Drupal 8 site using a mix of `default` code and files/data from https://wieting.TamaToledo.com.   
+
+
+##### Original *README.md* from *Docker4Drupal* follows.
 
 # Docker-based Drupal stack
 
