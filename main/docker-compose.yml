@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+
+  portainer:
+    image: portainer/portainer
+    container_name: "portainer"
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.backend: 'portainer'
+      traefik.port: '9000'
+      traefik.frontend.rule: 'Host:portainer.${DOMAIN}'
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: "mailhog"
+    labels:
+      traefik.backend: 'mailhog'
+      traefik.port: '8025'
+      traefik.frontend.rule: 'Host:mailhog.${DOMAIN}'

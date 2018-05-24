@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  traefik:
+    image: traefik
+    restart: unless-stopped
+    command: -c /dev/null --web --docker --logLevel=DEBUG
+    networks:
+      - d8
+      - d7
+      - main
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  main:
+    external:
+      name: main_default
+  d8:
+    external:
+      name: d8_default
+  d7:
+    external:
+      name: d7_default
