@@ -92,89 +92,50 @@ The project has been pushed to https://github.com/SummittDweller/SummittServices
 
 # Next Steps
 
-1. Add self-signed certs and *https*.
+1. Add self-signed certs and *https://*.
 2. Extend `default` sites with necessary contrib modules.
-3. Create a `wieting` Drupal 8 site using a mix of `default` code and files/data from https://wieting.TamaToledo.com.   
+3. Create a `wieting` Drupal 8 site using a mix of `default` code and files/data from https://wieting.TamaToledo.com.
+4. Try the config/profile process at https://www.chapterthree.com/blog/installing-drupal-8-from-configuration on the `Drupal8` site.
 
 
-##### Original *README.md* from *Docker4Drupal* follows.
 
-# Docker-based Drupal stack
+# Default Sites with HTTPS
 
-[![Build Status](https://travis-ci.org/wodby/docker4drupal.svg?branch=master)](https://travis-ci.org/wodby/docker4drupal)
-[![Wodby Slack](http://slack.wodby.com/badge.svg)](http://slack.wodby.com)
-[![Wodby Twitter](https://img.shields.io/twitter/follow/wodbyhq.svg?style=social&label=Follow)](https://twitter.com/wodbyhq)
+The discussion and configuration posted at
+https://github.com/wodby/docker4drupal/issues/50#issuecomment-291749340 informs this development.  The code snippet for reconfiguration of Traefik is:
 
-## Introduction
+```
+traefik:
+    image: traefik
+    restart: unless-stopped
+    command: -c /dev/null --web --docker --logLevel=INFO --defaultEntryPoints='https' --entryPoints="Name:https Address::443 TLS:/certs/cert.pem,/certs/key.pem" --entryPoints="Name:http Address::80 Redirect.EntryPoint:https"
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    volumes:
+      - ./certs:/certs/
+      - /var/run/docker.sock:/var/run/docker.sock
+```
 
-Docker4Drupal is a set of docker images optimized for Drupal. Use `docker-compose.yml` file from the [latest stable release](https://github.com/wodby/docker4drupal/releases) to spin up local environment on Linux, Mac OS X and Windows.
+Steps taken...
+1. Copied `../Sites/certs` directory to `SummittServices/certs`.
+2. Modified `SummittServices/traefik.yml` to include portions like above.
+3. [mark@centos7 Docker]$ source docker-restart-all.sh
+4. Initialize both the `Drupal7` and `Drupal8` sites as before.
 
-Read [**Getting Started**](http://wodby.com/stacks/drupal/docs/local/quick-start).
+__It works!__
 
-## Stack
+As far as I can remember, the contents of `certs`, two files, were generated at https://www.selfsignedcertificate.com.
 
-[wodby/drupal-nginx]: https://github.com/wodby/drupal-nginx
-[wodby/php-apache]: https://github.com/wodby/php-apache
-[wodby/drupal]: https://github.com/wodby/drupal
-[wodby/drupal-php]: https://github.com/wodby/drupal-php
-[wodby/mariadb]: https://github.com/wodby/mariadb
-[wodby/postgres]: https://github.com/wodby/postgres
-[wodby/redis]: https://github.com/wodby/redis
-[wodby/drupal-varnish]: https://github.com/wodby/drupal-varnish
-[wodby/drupal-solr]: https://github.com/wodby/drupal-solr
-[wodby/elasticsearch]: https://github.com/wodby/elasticsearch
-[wodby/kibana]: https://github.com/wodby/kibana
-[wodby/node]: https://github.com/wodby/node
-[wodby/drupal-node]: https://github.com/wodby/drupal-node
-[wodby/memcached]: https://github.com/wodby/memcached
-[wodby/webgrind]: https://hub.docker.com/r/wodby/webgrind
-[blackfire/blackfire]: https://hub.docker.com/r/blackfire/blackfire
-[wodby/rsyslog]: https://hub.docker.com/r/wodby/rsyslog
-[arachnysdocker/athenapdf-service]: https://hub.docker.com/r/arachnysdocker/athenapdf-service
-[mailhog/mailhog]: https://hub.docker.com/r/mailhog/mailhog
-[wodby/adminer]: https://hub.docker.com/r/wodby/adminer
-[phpmyadmin/phpmyadmin]: https://hub.docker.com/r/phpmyadmin/phpmyadmin
-[portainer/portainer]: https://hub.docker.com/r/portainer/portainer
-[_/traefik]: https://hub.docker.com/_/traefik
+Note that after the *docker-restart-all.sh* the Traefik dashboard still works at http://traefik.docker.localhost:8080/dashboard/ but all others must use `https://` and they must add exceptions during the first visit.
 
-The Drupal stack consist of the following containers:
+The new site addresses are:  
+http://traefik.docker.localhost:8080/dashboard/
+https://portainer.docker.localhost/#/dashboard  
+https://mailhog.docker.localhost/  
+https://d8.docker.localhost  
+https://d7.docker.localhost  
 
-| Container     | Versions           | Service name    | Image                              | Enabled by default |
-| ------------- | ------------------ | ------------    | ---------------------------------- | ------------------ |
-| Nginx         | 1.14, 1.13         | `nginx`         | [wodby/drupal-nginx]               | ✓                  |
-| Apache        | 2.4                | `apache`        | [wodby/php-apache]                 |                    |
-| Drupal        | 8, 7, 6            | `php`           | [wodby/drupal]                     | ✓                  |
-| PHP           | 7.1, 7.0, 5.6, 5.3 | `php`           | [wodby/drupal-php]                 |                    |
-| MariaDB       | 10.2, 10.1         | `mariadb`       | [wodby/mariadb]                    | ✓                  |
-| PostgreSQL    | 10.1, 9.6          | `postgres`      | [wodby/postgres]                   |                    |
-| Redis         | 4.0, 3.2           | `redis`         | [wodby/redis]                      |                    |
-| Varnish       | 4.1                | `varnish`       | [wodby/drupal-varnish]             |                    |
-| Node          | 9, 8               | `node`          | [wodby/node]                       |                    |
-| Drupal node   | 1.0                | `nodejs`        | [wodby/drupal-node]                |                    |
-| Solr          | 7.x, 6.x, 5.5, 5.4 | `solr`          | [wodby/drupal-solr]                |                    |
-| Elasticsearch | 6.x, 5.6, 5.5, 5.4 | `elasticsearch` | [wodby/elasticsearch]              |                    |
-| Kibana        | 6.x, 5.6, 5.5, 5.4 | `kibana`        | [wodby/kibana]                     |                    |
-| Memcached     | 1.4                | `memcached`     | [wodby/memcached]                  |                    |
-| Webgrind      | 1.5                | `webgrind`      | [wodby/webgrind]                   |                    |
-| Blackfire     | latest             | `blackfire`     | [blackfire/blackfire]              |                    |
-| Rsyslog       | latest             | `rsyslog`       | [wodby/rsyslog]                    |                    |
-| AthenaPDF     | 2.10.0             | `athenapdf`     | [arachnysdocker/athenapdf-service] |                    |
-| Mailhog       | latest             | `mailhog`       | [mailhog/mailhog]                  | ✓                  |
-| Adminer       | 4.3                | `adminer`       | [wodby/adminer]                    |                    |
-| phpMyAdmin    | latest             | `pma`           | [phpmyadmin/phpmyadmin]            |                    |
-| Portainer     | latest             | `portainer`     | [portainer/portainer]              | ✓                  |
-| Traefik       | latest             | `traefik`       | [_/traefik]                        | ✓                  |
-
-Supported Drupal versions: 8 / 7 / 6
-
-## Documentation
-
-Full documentation is available at https://wodby.com/stacks/drupal/docs/local.
-
-## Deployment
-
-Deploy consistent docker-based Drupal stack with orchestrations to your own server via [![Wodby](https://www.google.com/s2/favicons?domain=wodby.com) Wodby](https://cloud.wodby.com/stackhub/ada51e9b-2204-45ee-8e49-a4151912a168/detail).
-
-## License
-
-This project is licensed under the MIT open source license.
+---  
+The original *README.md* from *Docker4Drupal* can be found at https://github.com/wodby/docker4drupal/blob/master/README.md.
