@@ -9,6 +9,8 @@ Per instructions at https://wodby.com/stacks/drupal/docs/local/multiple-projects
 
 *Decimal numbered steps below are modified from the aforementioned instructions.  Roman numeral steps were added as necessary.*
 
+Note that on OSX I sometimes had to do `sudo nginx -s stop ` to free up port 8080 before any of this.
+
 #### I. Create a directory named `main` where common services like `portainer` and `mailhog` will exist.  Build a new `main/docker-compose.yml` file from `traefik.yml` and a new `main/.env` from the original `.env` file.
 
 ```
@@ -66,23 +68,23 @@ Note that I found it necessary to perform a `docker network prune` command in or
     Site Admin Email: admin@summittservices.com
     Site Admin Passwords: Drup@!7@dmin, Drup@!8@dmin
 
-The full startup sequence of commands is now...
+The full startup sequence of commands from `[mark@centos7 SummittServices]$` is now...
 
 ```
-[mark@centos7 SummittServices]$ source ../docker-destroy-all.sh
-[mark@centos7 SummittServices]$ docker network prune
-[mark@centos7 SummittServices]$ cd main
-[mark@centos7 main]$ docker-compose up -d
-[mark@centos7 SummittServices]$ cd ../d8
-[mark@centos7 d8]$ docker-compose up -d
-[mark@centos7 SummittServices]$ cd ../d7
-[mark@centos7 d8]$ docker-compose up -d
-[mark@centos7 d7]$ cd ..
-[mark@centos7 SummittServices]$ docker-compose -f traefik.yml up -d
+source ../docker-destroy-all.sh
+docker network prune
+cd main
+docker-compose up -d
+cd ../d8
+docker-compose up -d
+cd ../d7
+docker-compose up -d
+cd ..
+docker-compose -f traefik.yml up -d
 ```
 
 Note: You can achieve ALL of the above semi-automatically using:  
-  `source ~/Projects/Docker/docker-restart-all.sh`
+  `source ~/Projects/Docker/docker-restart-SummittServices.sh`
 
 # Default Sites Status
 
@@ -132,7 +134,7 @@ As far as I can remember, the contents of `certs`, two files, were generated at 
 Note that after the *docker-restart-all.sh* the Traefik dashboard still works at http://traefik.docker.localhost:8080/dashboard/ but all others must use `https://` and they must add exceptions during the first visit.
 
 The new site addresses are:  
-http://traefik.docker.localhost:8080/dashboard/
+http://traefik.docker.localhost:8080/dashboard/  
 https://portainer.docker.localhost/#/dashboard  
 https://mailhog.docker.localhost/  
 https://d8.docker.localhost  
@@ -167,12 +169,12 @@ Then `nano composer.json` and I added the following two lines to the `extras` | 
 
 Then I downloaded the current `composer.json` from the PHP container, edited it in Atom adding the parts shown below to the `repositories` key like so...
 ```
-[mark@centos7 SummittServices]$ docker cp d8_php:/var/www/html/composer.json .  
+[mark@centos7 SummittServices]$ docker cp d8_php:/var/www/html/composer.json ./d8/  
 ...edit in Atom...  
-[mark@centos7 SummittServices]$ docker cp ./composer.json d8_php:/var/www/html/composer.json
+[mark@centos7 SummittServices]$ docker cp ./d8/composer.json d8_php:/var/www/html/composer.json
 ```
 
-The working `composer.json` file is now held in my `~/Projects/Docker/SummittServices` project directory.
+The working `composer.json` file is now held in my `~/Projects/Docker/SummittServices/d8` project directory.
 
 ### Added Modules and Theme Must Now Be Enabled
 
