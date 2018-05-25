@@ -94,8 +94,9 @@ The project has been pushed to https://github.com/SummittDweller/SummittServices
 
 1. Add self-signed certs and *https://*.
 2. Extend `default` sites with necessary contrib modules.
-3. Create a `wieting` Drupal 8 site using a mix of `default` code and files/data from https://wieting.TamaToledo.com.
-4. Try the config/profile process at https://www.chapterthree.com/blog/installing-drupal-8-from-configuration on the `Drupal8` site.
+3. Try the config/profile process at https://www.chapterthree.com/blog/installing-drupal-8-from-configuration on the `Drupal8` site.
+4. Create a `wieting` Drupal 8 site using a mix of `default` code and files/data from https://wieting.TamaToledo.com.
+
 
 
 
@@ -136,6 +137,71 @@ https://portainer.docker.localhost/#/dashboard
 https://mailhog.docker.localhost/  
 https://d8.docker.localhost  
 https://d7.docker.localhost  
+
+This work saved as https://github.com/SummittDweller/SummittServices/tree/default_sites_with_https.
+
+# Extending the Drupal8 Site with Contrib Modules
+
+Some good advice/guidance can be found at https://www.lullabot.com/articles/drupal-8-composer-best-practices.
+
+Opened a terminal into the `d8_php` container from **Portainer**.  Then from the `wodby@php.container:/var/www/html $` prompt...
+
+```
+composer require drupal/bootstrap drupal/profile drupal/pathauto drupal/calendar drupal/views_templates
+composer require drupal/google_analytics drupal/embed drupal/entity_embed drupal/taxonomy_menu drupal/blog
+composer require drupal/hms_field drupal/entity_clone drupal/rules drupal/redirect
+composer require drupal/media_entity drupal/media_entity_image drupal/entity_browser drupal/media_entity_flickr drupal/exif
+composer require drupal/backup_migrate drupal/simplenews drupal/permissions_by_term drupal/social_media drupal/imce
+composer require drupal/mailgun
+composer require --dev drupal/devel drupal/examples
+composer require doctrine/annotations
+composer update
+```
+
+Then `nano composer.json` and I added the following two lines to the `extras` | `installer-paths` portion:
+
+```
+"web/sites/all/modules/custom/{$name}/": ["type:drupal-custom-module"],
+"web/sites/all/themes/custom/{$name}/": ["type:drupal-custom-theme"],
+```
+
+Then I downloaded the current `composer.json` from the PHP container, edited it in Atom adding the parts shown below to the `repositories` key like so...
+```
+[mark@centos7 SummittServices]$ docker cp d8_php:/var/www/html/composer.json .  
+...edit in Atom...  
+[mark@centos7 SummittServices]$ docker cp ./composer.json d8_php:/var/www/html/composer.json
+```
+
+The working `composer.json` file is now held in my `~/Projects/Docker/SummittServices` project directory.
+
+### Added Modules and Theme Must Now Be Enabled
+
+To determine exactly what modules/themes to enable in `Drupal8` I visited my `mm3.getcybersolutions.com` server and expected to execute a `drush pm-list` command, but `drush` is NOT installed there!
+
+
+
+
+# Default Sites with Config Export/Import
+
+Opened a terminal into the `d8_php` container from Portainer.  From the `wodby@php.container:/var/www/html $` prompt...
+
+```
+composer require drupal/install_profile_generator  
+composer update
+composer remove drupal/install_profile_generator
+
+```
+The module was removed in the end because it did NOT work.  Going to try using `drush config:pull` and `drush config:import` instead **only after extending Drupal8 with contributed and custom modules/themes**.
+
+
+
+
+
+
+
+
+
+
 
 ---  
 The original *README.md* from *Docker4Drupal* can be found at https://github.com/wodby/docker4drupal/blob/master/README.md.
