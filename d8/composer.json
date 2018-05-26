@@ -5,8 +5,8 @@
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "",
-            "role": ""
+            "name": "Mark A. McFate",
+            "role": "Creator"
         }
     ],
     "repositories": [
@@ -15,31 +15,14 @@
             "url": "https://packages.drupal.org/8"
         },
         {
-            "type": "package",
-            "package": {
-                "name": "wieting_theme",
-                "version": "dev-master",
-                "type":"drupal-theme",
-                "source": {
-                    "url": "https://github.com/SummittDweller/wieting_theme.git",
-                    "type": "git",
-                    "reference": "master"
-                }
-            }
+            "type": "vcs",
+            "url": "https://github.com/SummittDweller/wieting_theme.git"
         },
         {
-            "type": "package",
-            "package": {
-                "name": "wieting",
-                "version": "dev-master",
-                "type":"drupal-module",
-                "source": {
-                    "url": "https://github.com/SummittDweller/wieting.git",
-                    "type": "git",
-                    "reference": "master"
-                }
-            }
+            "type": "vcs",
+            "url": "https://github.com/SummittDweller/wieting.git"
         }
+
     ],
     "require": {
         "composer/installers": "^1.2",
@@ -77,8 +60,8 @@
         "vlucas/phpdotenv": "^2.4",
         "webflo/drupal-finder": "^1.0.0",
         "webmozart/path-util": "^2.3",
-        "summittdweller/wieting": "dev-master",
-        "summittdweller/wieting_theme": "dev-master"
+        "summittdweller/wieting_theme": "dev-master",
+        "summittdweller/theme": "dev-master"
     },
     "require-dev": {
         "drupal/devel": "^1.2",
@@ -122,8 +105,8 @@
             "web/profiles/contrib/{$name}": ["type:drupal-profile"],
             "web/themes/contrib/{$name}": ["type:drupal-theme"],
             "drush/contrib/{$name}": ["type:drupal-drush"],
-            "web/themes/custom/{$name}": ["summittdweller/wieting_theme"],
-            "web/modules/custom/{$name}": ["summittdweller/wieting"]
+            "web/themes/custom/{$name}": ["type:drupal-custom-theme", "summittdweller/wieting_theme"],
+            "web/modules/custom/{$name}": ["type:drupal-custom-module"]
         }
     }
 }
